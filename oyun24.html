@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veri Analizi - Tablo Okuma</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #bdbdbd;
+            color: #263238;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-image: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+        }
+
+        /* Arkaplan Efekti */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .3) 25%, rgba(255, 255, 255, .3) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .3) 75%, rgba(255, 255, 255, .3) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .3) 25%, rgba(255, 255, 255, .3) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .3) 75%, rgba(255, 255, 255, .3) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+        }
+
+        /* Top HUD */
+        .hud-top {
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #455a64;
+            color: #455a64;
+            padding: 10px 25px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hud-btn:hover {
+            background: #455a64;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(69, 90, 100, 0.3);
+        }
+
+        .btn-code {
+            border-color: #0984e3;
+            color: #0984e3;
+        }
+
+        .btn-code:hover {
+            background: #0984e3;
+            color: white;
+        }
+
+        /* Scene */
+        .scene-container {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Tablet UI */
+        .tablet-frame {
+            width: 700px;
+            height: 500px;
+            background: #263238;
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            border: 2px solid #546e7a;
+            position: relative;
+        }
+
+        .tablet-screen {
+            width: 100%;
+            height: 100%;
+            background: #f5f5f5;
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-header {
+            background: #0277bd;
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Orbitron';
+        }
+
+        .app-content {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #e1f5fe;
+            color: #01579b;
+        }
+
+        tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .missing-cell {
+            background: #fff9c4;
+            border: 2px dashed #fbc02d;
+            font-weight: bold;
+            color: #f57f17;
+        }
+
+        .input-area {
+            margin-top: 25px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            background: #eceff1;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .answer-input {
+            background: #fff;
+            border: 2px solid #90a4ae;
+            color: #37474f;
+            font-size: 1.5rem;
+            padding: 8px;
+            width: 100px;
+            font-family: 'Orbitron', serif;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .btn-predict {
+            background: #0277bd;
+            color: #fff;
+            border: none;
+            padding: 10px 25px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Orbitron', serif;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .btn-predict:hover {
+            background: #01579b;
+        }
+
+        .progress-bar {
+            width: 60%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            margin-top: 30px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .fill {
+            height: 100%;
+            width: 0%;
+            background: #0277bd;
+            transition: width 0.5s;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 40px;
+            text-align: center;
+            border-radius: 20px;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: #b2bec3;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #2d3436;
+        }
+
+        .solution-box {
+            background: #e1f5fe;
+            border-left: 6px solid #0277bd;
+            padding: 20px;
+            text-align: left;
+            margin: 20px 0;
+            color: #01579b;
+            border-radius: 0 10px 10px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .next-btn {
+            background: linear-gradient(45deg, #0277bd, #0288d1);
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(2, 119, 189, 0.4);
+            transition: 0.3s;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(2, 119, 189, 0.6);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #2d3436;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-family: 'Consolas', monospace;
+            font-size: 1rem;
+            margin: 20px 0;
+            border-left: 5px solid #0984e3;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .kw {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .fn {
+            color: #8be9fd;
+        }
+
+        .str {
+            color: #f1fa8c;
+        }
+
+        .com {
+            color: #6272a4;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-pattern"></div>
+
+    <div class="hud-top">
+        <a href="index2.html" class="hud-btn">❮ VADİYE DÖN</a>
+        <div
+            style="font-size:1.4rem; color:#37474f; font-family:'Orbitron'; font-weight:bold; text-shadow:1px 1px 0 rgba(255,255,255,0.8);">
+            VERİ ANALİZİ</div>
+        <button onclick="openModal('codeModal')" class="hud-btn btn-code">💻 KODLA</button>
+    </div>
+
+    <div class="scene-container">
+
+        <div class="tablet-frame">
+            <div class="tablet-screen">
+                <div class="app-header">
+                    <span style="font-size:1.5rem;">📊</span>
+                    <span>Climate_Data_Log.csv</span>
+                </div>
+                <div class="app-content">
+                    <table id="data-table">
+                        <!-- Content -->
+                    </table>
+
+                    <div class="input-area" id="input-area">
+                        <div style="font-size:1.2rem; color:#37474f;">Eksik Veri:</div>
+                        <input type="number" class="answer-input" id="user-ans" placeholder="?">
+                        <button class="btn-predict" onclick="checkAnswer()">KAYDET</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="fill" id="p-bar"></div>
+        </div>
+
+    </div>
+
+    <!-- Solution Modal -->
+    <div class="modal" id="solutionModal">
+        <div class="modal-content">
+            <h2 style="color:#0277bd; margin:0; font-family:'Orbitron';">📈 TABLO ANALİZİ</h2>
+            <div class="solution-box" id="solution-text"></div>
+            <button class="next-btn" onclick="nextLevel()">SONRAKİ SEVİYE ❯</button>
+        </div>
+    </div>
+
+    <!-- Code Modal -->
+    <div class="modal" id="codeModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('codeModal')">&times;</span>
+            <h2 style="color:#0984e3; margin-top:0; font-family:'Orbitron';">💻 KOD LABORATUVARI</h2>
+            <p style="color:#636e72;">Tablo verileri bilgisayarda "Dizi" (Array) olarak tutulur.</p>
+            <div class="code-block" id="code-content">
+                <span class="com">// Veri listesi</span><br>
+                <span class="kw">let</span> veriler = [<span id="code-array-data">100, 150, 200, 250</span>];<br><br>
+                <span class="com">// Listeden eleman seçme</span><br>
+                <span class="com">// Bilgisayar saymaya 0'dan başlar!</span><br>
+                <span class="kw">let</span> secilen = veriler[<span class="str">2</span>]; <span class="com">// 3.
+                    sıradaki veri</span>
+            </div>
+            <a href="https://app.talent14.com/codeEditor" target="_blank" class="next-btn"
+                style="text-decoration:none; display:inline-block; margin-top:10px;">EDİTÖRÜ AÇ</a>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <h2 style="color:#0277bd; font-family:'Orbitron';">VERİ TABANI GÜNCELLENDİ!</h2>
+            <p style="color:#555; font-size:1.1rem;">Tüm eksik kayıtlar başarıyla tamamlandı.</p>
+            <div style="font-size:4rem; margin:20px;">💾</div>
+            <button class="next-btn" onclick="window.location.href='index2.html'">VADİYE DÖN</button>
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            { headers: ["Hafta", "Fidan Boyu (cm)"], start: 10, inc: 5, missingIdx: 3, rows: 5, text: "periyodik büyüme" },
+            { headers: ["Saat", "Sıcaklık (°C)"], start: 20, inc: 2, missingIdx: 2, rows: 4, text: "ısınma eğilimi" },
+            { headers: ["Yıl", "Ağaç Sayısı"], start: 100, inc: 50, missingIdx: 4, rows: 5, text: "ormanlaşma hızı" },
+            { headers: ["Defo", "İskonto (TL)"], start: 5, inc: 5, missingIdx: 3, rows: 5, text: "fire oranı" },
+            { headers: ["Grup", "Öğrenci Sayısı"], start: 12, inc: 4, missingIdx: 2, rows: 4, text: "kontenjan artışı" }
+        ];
+
+        let currentLvl = 0;
+        let isLocked = false;
+
+        function startGame() {
+            currentLvl = 0;
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLvl >= levels.length) {
+                document.getElementById('winModal').style.display = 'flex';
+                return;
+            }
+
+            const L = levels[currentLvl];
+            const table = document.getElementById('data-table');
+            table.innerHTML = "";
+            document.getElementById('user-ans').value = "";
+
+            // Header
+            let thead = `<tr><th>${L.headers[0]}</th><th>${L.headers[1]}</th></tr>`;
+            table.innerHTML += thead;
+
+            // Build visual table data
+            let arrData = [];
+
+            for (let i = 1; i <= L.rows; i++) {
+                let val = L.start + (i - 1) * L.inc;
+                arrData.push(val);
+
+                let valCell = (i === L.missingIdx) ? `<span class="missing-cell">?</span>` : val;
+
+                let row = `<tr>
+                    <td>${i}</td>
+                    <td>${valCell}</td>
+                </tr>`;
+                table.innerHTML += row;
+            }
+
+            // Update Code Modal Logic
+            document.getElementById('code-array-data').innerText = arrData.slice(0, 4).join(", ");
+
+            document.getElementById('p-bar').style.width = ((currentLvl / levels.length) * 100) + "%";
+            isLocked = false;
+        }
+
+        function checkAnswer() {
+            if (isLocked) return;
+
+            const L = levels[currentLvl];
+            const correctAns = L.start + (L.missingIdx - 1) * L.inc;
+            const userAns = parseInt(document.getElementById('user-ans').value);
+
+            if (userAns === correctAns) {
+                isLocked = true;
+
+                // Detailed Solution
+                let solHtml = `<strong>📊 Analiz:</strong> Tabloda her satırda değer <strong>${L.inc}</strong> artmaktadır.<br><br>`;
+                solHtml += `<strong>Hesaplama:</strong><br>`;
+                solHtml += `1. Satır: ${L.start}<br>`;
+
+                // Show rows up to missing
+                for (let i = 2; i <= L.missingIdx; i++) {
+                    let v = L.start + (i - 1) * L.inc;
+                    if (i === L.missingIdx) {
+                        solHtml += `<div style="background:#fff9c4; padding:5px; border-radius:5px; font-weight:bold; color:#f57f17; display:inline-block; margin-top:5px;">${i}. Satır (Eksik): ${v} ✅</div><br>`;
+                    } else {
+                        solHtml += `${i}. Satır: ${v}<br>`;
+                    }
+                }
+
+                document.getElementById('solution-text').innerHTML = solHtml;
+                setTimeout(() => { openModal('solutionModal'); }, 800);
+            } else {
+                // Shake input
+                const inputArea = document.getElementById('input-area');
+                inputArea.style.transform = "translateX(5px)";
+                setTimeout(() => inputArea.style.transform = "translateX(-5px)", 50);
+                setTimeout(() => inputArea.style.transform = "translateX(5px)", 100);
+                setTimeout(() => inputArea.style.transform = "translateX(0)", 150);
+            }
+        }
+
+        function nextLevel() {
+            closeModal('solutionModal');
+            currentLvl++;
+            loadLevel();
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        document.getElementById('user-ans').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkAnswer();
+        });
+
+        window.onload = startGame;
+    </script>
+</body>
+
+</html>

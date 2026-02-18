@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Sera - Şekil Örüntüleri</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #e0f7fa;
+            color: #2c3e50;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-image: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        /* Arkaplan Efekti */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                radial-gradient(#2e7d32 1px, transparent 1px),
+                radial-gradient(#66bb6a 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            opacity: 0.1;
+        }
+
+        /* Top HUD */
+        .hud-top {
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #2e7d32;
+            color: #2e7d32;
+            padding: 10px 25px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hud-btn:hover {
+            background: #2e7d32;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.2);
+        }
+
+        .btn-code {
+            border-color: #0984e3;
+            color: #0984e3;
+        }
+
+        .btn-code:hover {
+            background: #0984e3;
+            color: white;
+        }
+
+        /* Scene */
+        .scene-container {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 20px;
+            z-index: 5;
+        }
+
+        .steps-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-end;
+            justify-content: center;
+            margin-bottom: 30px;
+            height: 280px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .step-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            transition: transform 0.3s;
+        }
+
+        .step-box:hover {
+            transform: scale(1.05);
+        }
+
+        .step-label {
+            margin-top: 10px;
+            color: #2e7d32;
+            font-size: 1rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .plant-grid {
+            display: grid;
+            gap: 3px;
+            background: #a5d6a7;
+            padding: 6px;
+            border-radius: 8px;
+            box-shadow: 0 5px 0 #81c784;
+            transition: 0.3s;
+        }
+
+        .plant {
+            width: 20px;
+            height: 20px;
+            background-color: #2e7d32;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a5d6a7;
+            font-size: 12px;
+        }
+
+        /* Question Panel */
+        .question-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 50px;
+            border-radius: 25px;
+            text-align: center;
+            min-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 1);
+        }
+
+        .q-text {
+            font-size: 1.4rem;
+            color: #37474f;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .options-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .opt-btn {
+            background: #fff;
+            border: 2px solid #b0bec5;
+            color: #37474f;
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            font-family: 'Orbitron';
+            min-width: 80px;
+            box-shadow: 0 4px 0 #b0bec5;
+        }
+
+        .opt-btn:hover {
+            border-color: #2e7d32;
+            color: #2e7d32;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #b0bec5;
+        }
+
+        .opt-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0;
+        }
+
+        .opt-btn.correct {
+            background: #00c853;
+            border-color: #00c853;
+            color: white;
+            box-shadow: 0 4px 0 #009624;
+        }
+
+        .opt-btn.wrong {
+            background: #ff7675;
+            border-color: #ff7675;
+            color: white;
+            box-shadow: 0 4px 0 #d63031;
+        }
+
+        /* Progress */
+        .progress-bar {
+            width: 60%;
+            height: 12px;
+            background: rgba(38, 50, 56, 0.1);
+            border-radius: 10px;
+            margin-top: 30px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #2e7d32, #66bb6a);
+            transition: width 0.5s;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 40px;
+            text-align: center;
+            border-radius: 20px;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: #b2bec3;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #2d3436;
+        }
+
+        .solution-box {
+            background: #f1f8e9;
+            border-left: 6px solid #2e7d32;
+            padding: 20px;
+            text-align: left;
+            margin: 20px 0;
+            color: #1b5e20;
+            border-radius: 0 10px 10px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .next-btn {
+            background: linear-gradient(45deg, #2e7d32, #43a047);
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4);
+            transition: 0.3s;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.6);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #2d3436;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-family: 'Consolas', monospace;
+            font-size: 1rem;
+            margin: 20px 0;
+            border-left: 5px solid #0984e3;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .kw {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .fn {
+            color: #8be9fd;
+        }
+
+        .str {
+            color: #f1fa8c;
+        }
+
+        .com {
+            color: #6272a4;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-pattern"></div>
+
+    <div class="hud-top">
+        <a href="index2.html" class="hud-btn">❮ VADİYE DÖN</a>
+        <div
+            style="font-size:1.4rem; color:#1b5e20; font-family:'Orbitron'; font-weight:bold; text-shadow:1px 1px 0 rgba(255,255,255,0.8);">
+            AKILLI SERA</div>
+        <button onclick="openModal('codeModal')" class="hud-btn btn-code">💻 KODLA</button>
+    </div>
+
+    <div class="scene-container">
+
+        <div class="steps-container" id="steps-area">
+            <!-- Steps generated here -->
+        </div>
+
+        <div class="question-panel">
+            <div class="q-text" id="q-text">4. Adımda kaç bitki modülü gerekir?</div>
+            <div class="options-grid" id="opt-grid"></div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="fill" id="p-bar"></div>
+        </div>
+
+    </div>
+
+    <!-- Solution Modal -->
+    <div class="modal" id="solutionModal">
+        <div class="modal-content">
+            <h2 style="color:#2e7d32; margin:0; font-family:'Orbitron';">🌱 BÜYÜME ANALİZİ</h2>
+            <div class="solution-box" id="solution-text">
+                <!-- Content -->
+            </div>
+            <button class="next-btn" onclick="nextLevel()">SONRAKİ SEVİYE ❯</button>
+        </div>
+    </div>
+
+    <!-- Code Modal -->
+    <div class="modal" id="codeModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('codeModal')">&times;</span>
+            <h2 style="color:#0984e3; margin-top:0; font-family:'Orbitron';">💻 KOD LABORATUVARI</h2>
+            <p style="color:#636e72;">Bir şekil örüntüsünü bilgisayara nasıl çizdiririz?</p>
+            <div class="code-block" id="code-content">
+                <span class="com">// Çizilecek gridin boyutu</span><br>
+                <span class="kw">let</span> boyut = <span class="str" id="code-size">4</span>;<br><br>
+                <span class="com">// İç içe döngüler ile kare çizimi</span><br>
+                <span class="kw">for</span> (let y = 0; y < boyut; y++) {<br>
+                    &nbsp;&nbsp;<span class="kw">for</span> (let x = 0; x < boyut; x++) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">bitkiEkle</span>(x, y);<br>
+                        &nbsp;&nbsp;}<br>
+                        }
+            </div>
+            <a href="https://app.talent14.com/codeEditor" target="_blank" class="next-btn"
+                style="text-decoration:none; display:inline-block; margin-top:10px;">EDİTÖRÜ AÇ</a>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <h2 style="color:#2e7d32; font-family:'Orbitron';">BÜTÜN SERALAR KURULDU!</h2>
+            <p style="color:#555; font-size:1.1rem;">Sera otomasyonu ve bitki dizilimi kusursuz.</p>
+            <div style="font-size:4rem; margin:20px;">🌻</div>
+            <button class="next-btn" onclick="window.location.href='index2.html'">VADİYE DÖN</button>
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            { type: 'linear', start: 1, inc: 2, qStep: 4, text: "Tek Sıralı Dizin", rule: "Her adımda 2 bitki ekleniyor." },
+            { type: 'linear', start: 2, inc: 3, qStep: 4, text: "Genişleyen Tarh", rule: "Her adımda 3 bitki ekleniyor." },
+            { type: 'square', start: 0, inc: 0, qStep: 3, text: "Kare Parsel", rule: "Adım sayısının karesi kadar alan kaplıyor." },
+            { type: 'linear', start: 4, inc: 4, qStep: 4, text: "Dörtlü Sistem", rule: "Her adımda 4 modül artıyor." },
+            { type: 'linear', start: 3, inc: 2, qStep: 5, text: "Koridor Ekim", rule: "Başlangıç 3, her adım +2 artıyor." }
+        ];
+
+        let currentLvl = 0;
+        let isLocked = false;
+
+        function startGame() {
+            currentLvl = 0;
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLvl >= levels.length) {
+                document.getElementById('winModal').style.display = 'flex';
+                return;
+            }
+
+            const L = levels[currentLvl];
+            const stepsArea = document.getElementById('steps-area');
+            stepsArea.innerHTML = "";
+
+            // Update Code Modal
+            document.getElementById('code-size').innerText = L.qStep;
+
+            let values = [];
+            // Show up to 3 previous steps
+            let showCount = (L.qStep - 1) > 3 ? 3 : (L.qStep - 1);
+            if (showCount < 1) showCount = 0; // if step 1 asked, show nothing before
+
+            // Calculate values for all relevant steps
+            for (let s = 1; s <= L.qStep; s++) {
+                let val = 0;
+                if (L.type === 'linear') val = L.start + (s - 1) * L.inc;
+                if (L.type === 'square') val = s * s;
+                values.push(val);
+            }
+            let correctAns = values[L.qStep - 1];
+
+            // Render steps
+            for (let i = 0; i < showCount; i++) {
+                let count = values[i];
+                let box = document.createElement('div');
+                box.className = 'step-box';
+
+                let grid = document.createElement('div');
+                grid.className = 'plant-grid';
+
+                if (L.type === 'square') {
+                    grid.style.gridTemplateColumns = `repeat(${i + 1}, 1fr)`;
+                } else {
+                    let cols = Math.ceil(Math.sqrt(count));
+                    if (cols < 2) cols = 2; // min width
+                    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                }
+
+                for (let b = 0; b < count; b++) {
+                    let p = document.createElement('div');
+                    p.className = 'plant';
+                    p.innerText = "✾";
+                    grid.appendChild(p);
+                }
+
+                box.appendChild(grid);
+                box.innerHTML += `<div class="step-label">${i + 1}. Adım (${count})</div>`;
+                stepsArea.appendChild(box);
+            }
+
+            // Question Box
+            let qBox = document.createElement('div');
+            qBox.className = 'step-box';
+            let qVisual = document.createElement('div');
+            qVisual.style.cssText = "width:70px; height:70px; border:3px dashed #2e7d32; display:flex; align-items:center; justify-content:center; color:#2e7d32; font-size:2.5rem; border-radius:10px; background:rgba(255,255,255,0.5);";
+            qVisual.innerText = "?";
+            qBox.appendChild(qVisual);
+            qBox.innerHTML += `<div class="step-label" style="background:#ffe0b2; color:#bf360c;">${L.qStep}. Adım</div>`;
+            stepsArea.appendChild(qBox);
+
+            document.getElementById('q-text').innerText = `${L.text}: ${L.qStep}. Adımda kaç bitki gerekir?`;
+
+            // Options
+            let opts = [correctAns];
+            while (opts.length < 3) {
+                let offset = Math.floor(Math.random() * 5) + 1;
+                if (Math.random() > 0.5) offset = -offset;
+                let wrong = correctAns + offset;
+                if (wrong > 0 && !opts.includes(wrong)) opts.push(wrong);
+            }
+            opts.sort(() => Math.random() - 0.5);
+
+            const optGrid = document.getElementById('opt-grid');
+            optGrid.innerHTML = "";
+            opts.forEach(val => {
+                let btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.innerText = val;
+                btn.onclick = () => handleAnswer(btn, val, correctAns, L);
+                optGrid.appendChild(btn);
+            });
+
+            document.getElementById('p-bar').style.width = ((currentLvl / levels.length) * 100) + "%";
+            isLocked = false;
+        }
+
+        function handleAnswer(btn, val, correct, levelData) {
+            if (isLocked) return;
+            isLocked = true;
+
+            if (val === correct) {
+                btn.classList.add('correct');
+
+                let solHtml = `<strong>🎯 Kural:</strong> ${levelData.rule}<br><br>`;
+                solHtml += `<strong>Gelişim Tablosu:</strong><br>`;
+
+                for (let s = 1; s <= levelData.qStep; s++) {
+                    let v = 0;
+                    if (levelData.type === 'linear') v = levelData.start + (s - 1) * levelData.inc;
+                    if (levelData.type === 'square') v = s * s;
+
+                    let isTarget = (s === levelData.qStep);
+                    let style = isTarget ? "color:#00c853; font-weight:bold; background:#e8f5e9; padding:3px 8px; border-radius:5px;" : "";
+                    let check = isTarget ? " ✅" : "";
+
+                    solHtml += `<div style="margin-bottom:4px; ${style}">${s}. Adım: <strong>${v}</strong> bitki${check}</div>`;
+                }
+
+                document.getElementById('solution-text').innerHTML = solHtml;
+                setTimeout(() => { openModal('solutionModal'); }, 800);
+            } else {
+                btn.classList.add('wrong');
+                setTimeout(() => {
+                    btn.classList.remove('wrong');
+                    isLocked = false;
+                }, 1000);
+            }
+        }
+
+        function nextLevel() {
+            closeModal('solutionModal');
+            currentLvl++;
+            loadLevel();
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        window.onload = startGame;
+    </script>
+</body>
+
+</html>

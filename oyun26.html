@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doğa Koruyucusu - Değerlendirme</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #fff3e0;
+            color: #3e2723;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Arkaplan Efekti (Rozet Desenleri) */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                radial-gradient(#ffcc80 20%, transparent 20%),
+                radial-gradient(#ffe0b2 20%, transparent 20%);
+            background-color: #fff3e0;
+            background-position: 0 0, 50px 50px;
+            background-size: 100px 100px;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Top HUD */
+        .hud-top {
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #ef6c00;
+            color: #ef6c00;
+            padding: 10px 25px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(239, 108, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hud-btn:hover {
+            background: #ef6c00;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(239, 108, 0, 0.3);
+        }
+
+        .btn-code {
+            border-color: #0984e3;
+            color: #0984e3;
+            box-shadow: 0 4px 6px rgba(33, 150, 243, 0.1);
+        }
+
+        .btn-code:hover {
+            background: #0984e3;
+            color: white;
+            box-shadow: 0 6px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        /* Scene */
+        .scene-container {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Badge Center */
+        .badge-center {
+            width: 150px;
+            height: 150px;
+            background: #fff;
+            border-radius: 50%;
+            border: 5px solid #ff9800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            box-shadow: 0 10px 30px rgba(255, 152, 0, 0.3);
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .badge-star {
+            position: absolute;
+            font-size: 1.5rem;
+            color: #ffd700;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: 0.5s;
+        }
+
+        /* Question Panel */
+        .question-panel {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 600px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ffe0b2;
+            position: relative;
+        }
+
+        .q-title {
+            font-size: 1.1rem;
+            color: #ef6c00;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-family: 'Orbitron';
+        }
+
+        .q-text {
+            font-size: 1.4rem;
+            color: #3e2723;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .options-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .opt-btn {
+            background: #fff;
+            border: 2px solid #bdbdbd;
+            color: #616161;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .opt-btn:hover {
+            border-color: #ff9800;
+            background: #fff3e0;
+            color: #e65100;
+            transform: translateY(-2px);
+        }
+
+        .opt-btn.correct {
+            background: #4caf50;
+            border-color: #4caf50;
+            color: white;
+        }
+
+        .opt-btn.wrong {
+            background: #f44336;
+            border-color: #f44336;
+            color: white;
+        }
+
+        .progress-bar {
+            width: 60%;
+            height: 12px;
+            background: #efebe9;
+            border-radius: 10px;
+            margin-top: 40px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff9800, #ff5722);
+            transition: width 0.5s;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 40px;
+            text-align: center;
+            border-radius: 20px;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: #bcaaa4;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #3e2723;
+        }
+
+        .solution-box {
+            background: #fff3e0;
+            border-left: 6px solid #ff9800;
+            padding: 20px;
+            text-align: left;
+            margin: 20px 0;
+            color: #ef6c00;
+            border-radius: 0 10px 10px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .next-btn {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+            transition: 0.3s;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 152, 0, 0.6);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #2d3436;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-family: 'Consolas', monospace;
+            font-size: 1rem;
+            margin: 20px 0;
+            border-left: 5px solid #0984e3;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .kw {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .fn {
+            color: #8be9fd;
+        }
+
+        .str {
+            color: #f1fa8c;
+        }
+
+        .com {
+            color: #6272a4;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-pattern"></div>
+
+    <div class="hud-top">
+        <a href="index2.html" class="hud-btn">❮ VADİYE DÖN</a>
+        <div
+            style="font-size:1.4rem; color:#ef6c00; font-family:'Orbitron'; font-weight:bold; text-shadow:1px 1px 0 rgba(255,255,255,0.8);">
+            DOĞA KORUYUCUSU</div>
+        <button onclick="openModal('codeModal')" class="hud-btn btn-code">💻 KODLA</button>
+    </div>
+
+    <div class="scene-container">
+
+        <div class="badge-center">
+            🛡️
+            <div class="badge-star" style="top:-20px; left:50%; transform:translateX(-50%);">⭐</div>
+            <div class="badge-star" style="bottom:10px; right:-10px;">⭐</div>
+            <div class="badge-star" style="bottom:10px; left:-10px;">⭐</div>
+        </div>
+
+        <div class="question-panel">
+            <div class="q-title" id="stage-title">AŞAMA 1: EĞİTİM</div>
+            <div class="q-text" id="q-text">Soru buraya gelecek...</div>
+            <div class="options-grid" id="opt-grid"></div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="fill" id="p-bar"></div>
+        </div>
+
+    </div>
+
+    <!-- Solution Modal -->
+    <div class="modal" id="solutionModal">
+        <div class="modal-content">
+            <h2 style="color:#ef6c00; margin:0; font-family:'Orbitron';">✅ DOĞRU CEVAP!</h2>
+            <div class="solution-box" id="solution-text"></div>
+            <button class="next-btn" onclick="nextLevel()">SONRAKİ AŞAMA ❯</button>
+        </div>
+    </div>
+
+    <!-- Code Modal -->
+    <div class="modal" id="codeModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('codeModal')">&times;</span>
+            <h2 style="color:#0984e3; margin-top:0; font-family:'Orbitron';">💻 KOD LABORATUVARI</h2>
+            <p style="color:#636e72;">Bir sınavda doğru cevabı nasıl kontrol ederiz?</p>
+            <div class="code-block" id="code-content">
+                <span class="kw">let</span> kullaniciCevabi = <span class="str">"A"</span>;<br>
+                <span class="kw">let</span> dogruCevap = <span class="str">"A"</span>;<br><br>
+                <span class="kw">if</span> (kullaniciCevabi == dogruCevap) {<br>
+                &nbsp;&nbsp;<span class="fn">puanVer</span>(10);<br>
+                &nbsp;&nbsp;<span class="fn">rozetEkle</span>(<span class="str">"⭐"</span>);<br>
+                } <span class="kw">else</span> {<br>
+                &nbsp;&nbsp;<span class="fn">ipucuGoster</span>();<br>
+                }
+            </div>
+            <a href="https://app.talent14.com/codeEditor" target="_blank" class="next-btn"
+                style="text-decoration:none; display:inline-block; margin-top:10px; background:#0984e3; box-shadow:0 4px 10px rgba(9, 132, 227,0.3);">EDİTÖRÜ
+                AÇ</a>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <h2 style="color:#ef6c00; font-family:'Orbitron';">TEBRİKLER KORUYUCU!</h2>
+            <p style="color:#555; font-size:1.1rem;">Doğa ve Bilim Vadisi sertifikasını almaya hak kazandın.</p>
+            <div style="font-size:5rem; margin:20px;">🏅</div>
+            <button class="next-btn" onclick="window.location.href='index2.html'">VADİYE DÖN</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                type: "Sayı Örüntüsü",
+                q: "Bir bambu fidanı her hafta 6 cm uzuyor. 1. hafta boyu 10 cm ise, 5. hafta boyu kaç cm olur?",
+                opts: [30, 34, 40],
+                ans: 34,
+                expl: "Başlangıç 10 cm. Her hafta +6 artıyor.<br>1. Hafta: 10<br>2. Hafta: 16<br>3. Hafta: 22<br>4. Hafta: 28<br>5. Hafta: 34"
+            },
+            {
+                type: "Genel Kural",
+                q: "Kuralı '4 katının 2 eksiği' olan örüntünün 3. terimi kaçtır?",
+                opts: [10, 12, 14],
+                ans: 10,
+                expl: "Kural: 4n - 2<br>n=3 için:<br>4 x 3 = 12<br>12 - 2 = 10"
+            },
+            {
+                type: "Şekil Örüntüsü",
+                q: "Birinci adımda 1 kare, ikinci adımda 3 kare, üçüncü adımda 5 kare kullanılıyor. 10. adımda kaç kare gerekir?",
+                opts: [19, 20, 21],
+                ans: 19,
+                expl: "Kural: 2n - 1 (Tek sayılar)<br>10. Adım: 2 x 10 - 1 = 19"
+            },
+            {
+                type: "İki İşlemli Kural",
+                q: "Bir makineye 5 atılınca 17 çıkıyor. 3 atılınca 11 çıkıyor. Kural nedir?",
+                opts: ["3 katının 2 fazlası", "2 katının 7 fazlası", "4 katının 3 eksiği"],
+                ans: "3 katının 2 fazlası",
+                expl: "Girdi: 5 -> (5x3)+2 = 17 ✅<br>Girdi: 3 -> (3x3)+2 = 11 ✅<br>Diğerleri sağlamaz."
+            },
+            {
+                type: "Son Karar",
+                q: "2n + 5 kuralına göre 50. terim kaçtır?",
+                opts: [100, 105, 150],
+                ans: 105,
+                expl: "Kural: 2n + 5<br>n=50 için:<br>2 x 50 = 100<br>100 + 5 = 105"
+            }
+        ];
+
+        let currentQ = 0;
+        let isLocked = false;
+
+        function startGame() {
+            currentQ = 0;
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQ >= questions.length) {
+                document.getElementById('winModal').style.display = 'flex';
+                return;
+            }
+
+            const Q = questions[currentQ];
+            document.getElementById('stage-title').innerText = `AŞAMA ${currentQ + 1}: ${Q.type.toUpperCase()}`;
+            document.getElementById('q-text').innerText = Q.q;
+
+            // Options
+            let opts = [...Q.opts];
+            opts.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('opt-grid');
+            grid.innerHTML = "";
+
+            opts.forEach(val => {
+                let btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.innerText = val;
+                btn.onclick = () => handleAnswer(btn, val, Q);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('p-bar').style.width = ((currentQ / questions.length) * 100) + "%";
+            isLocked = false;
+        }
+
+        function handleAnswer(btn, val, Q) {
+            if (isLocked) return;
+            isLocked = true;
+
+            if (val === Q.ans) {
+                btn.classList.add('correct');
+                document.getElementById('solution-text').innerHTML = Q.expl;
+
+                // Show stars
+                const stars = document.querySelectorAll('.badge-star');
+                if (currentQ < stars.length) stars[currentQ].style.opacity = 1;
+
+                setTimeout(() => { openModal('solutionModal'); }, 800);
+            } else {
+                btn.classList.add('wrong');
+                setTimeout(() => {
+                    btn.classList.remove('wrong');
+                    isLocked = false;
+                }, 1000);
+            }
+        }
+
+        function nextLevel() {
+            closeModal('solutionModal');
+            currentQ++;
+            loadQuestion();
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        window.onload = startGame;
+    </script>
+</body>
+
+</html>

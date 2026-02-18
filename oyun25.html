@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simülasyon Odası - Uzak Adımlar</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #263238;
+            color: #80cbc4;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Arkaplan Efekti (Dijital Izgara) */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Top HUD */
+        .hud-top {
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .hud-btn {
+            background: rgba(38, 50, 56, 0.8);
+            border: 2px solid #80cbc4;
+            color: #80cbc4;
+            padding: 10px 25px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(128, 203, 196, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hud-btn:hover {
+            background: #80cbc4;
+            color: #263238;
+            box-shadow: 0 0 20px rgba(128, 203, 196, 0.6);
+        }
+
+        .btn-code {
+            border-color: #2196f3;
+            color: #2196f3;
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+        }
+
+        .btn-code:hover {
+            background: #2196f3;
+            color: white;
+            box-shadow: 0 0 20px rgba(33, 150, 243, 0.6);
+        }
+
+        /* Scene */
+        .scene-container {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        /* Hologram Projector */
+        .holo-base {
+            width: 240px;
+            height: 60px;
+            background: #37474f;
+            border-radius: 50%;
+            border: 2px solid #546e7a;
+            position: relative;
+            margin-top: 50px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+        }
+
+        .hologram-beam {
+            position: absolute;
+            bottom: 40px;
+            width: 0;
+            height: 0;
+            border-left: 120px solid transparent;
+            border-right: 120px solid transparent;
+            border-top: 250px solid rgba(128, 203, 196, 0.15);
+            filter: blur(8px);
+            animation: flicker 3s infinite;
+            transform-origin: bottom center;
+        }
+
+        @keyframes flicker {
+
+            0%,
+            100% {
+                opacity: 0.8;
+                transform: scaleY(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scaleY(1.05);
+            }
+        }
+
+        .holo-content {
+            position: absolute;
+            bottom: 120px;
+            text-align: center;
+            width: 300px;
+            z-index: 6;
+        }
+
+        .holo-number {
+            font-family: 'Orbitron';
+            font-size: 6rem;
+            color: #00e5ff;
+            text-shadow: 0 0 20px #00e5ff;
+            opacity: 0.9;
+        }
+
+        /* Question Panel */
+        .question-panel {
+            background: rgba(38, 50, 56, 0.9);
+            border: 1px solid #546e7a;
+            padding: 30px 50px;
+            border-radius: 20px;
+            text-align: center;
+            min-width: 500px;
+            position: relative;
+            z-index: 10;
+            margin-top: 20px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .sequence-display {
+            font-size: 1.8rem;
+            color: #b2dfdb;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+            font-family: 'Orbitron';
+        }
+
+        .input-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .answer-input {
+            background: #263238;
+            border: 2px solid #4db6ac;
+            color: #fff;
+            font-size: 1.5rem;
+            padding: 8px 15px;
+            width: 120px;
+            font-family: 'Orbitron', serif;
+            text-align: center;
+            border-radius: 10px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .answer-input:focus {
+            box-shadow: 0 0 15px rgba(77, 182, 172, 0.5);
+        }
+
+        .btn-predict {
+            background: #4db6ac;
+            color: #000;
+            border: none;
+            padding: 10px 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Orbitron', serif;
+            border-radius: 30px;
+            transition: 0.3s;
+        }
+
+        .btn-predict:hover {
+            background: #80cbc4;
+            box-shadow: 0 0 20px rgba(128, 203, 196, 0.5);
+        }
+
+        .progress-bar {
+            width: 60%;
+            height: 10px;
+            background: #37474f;
+            border-radius: 10px;
+            margin-top: 40px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .fill {
+            height: 100%;
+            width: 0%;
+            background: #00bcd4;
+            box-shadow: 0 0 10px #00bcd4;
+            transition: width 0.5s;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #263238;
+            padding: 40px;
+            text-align: center;
+            border-radius: 20px;
+            max-width: 600px;
+            position: relative;
+            border: 2px solid #80cbc4;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: #546e7a;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: #80cbc4;
+        }
+
+        .solution-box {
+            background: #37474f;
+            border-left: 5px solid #00bcd4;
+            padding: 20px;
+            text-align: left;
+            margin: 20px 0;
+            color: #e0f2f1;
+            border-radius: 0 10px 10px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .next-btn {
+            background: #00bcd4;
+            color: #000;
+            padding: 12px 35px;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+            transition: 0.3s;
+        }
+
+        .next-btn:hover {
+            box-shadow: 0 0 30px rgba(0, 188, 212, 0.8);
+            transform: scale(1.05);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #101010;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-family: 'Consolas', monospace;
+            font-size: 1rem;
+            margin: 20px 0;
+            border-left: 5px solid #2196f3;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
+        }
+
+        .kw {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .fn {
+            color: #8be9fd;
+        }
+
+        .str {
+            color: #f1fa8c;
+        }
+
+        .com {
+            color: #6272a4;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-grid"></div>
+
+    <div class="hud-top">
+        <a href="index2.html" class="hud-btn">❮ VADİYE DÖN</a>
+        <div
+            style="font-size:1.4rem; color:#80cbc4; font-family:'Orbitron'; text-shadow:0 0 10px rgba(128,203,196,0.5);">
+            SİMÜLASYON ODASI</div>
+        <button onclick="openModal('codeModal')" class="hud-btn btn-code">💻 KODLA</button>
+    </div>
+
+    <div class="scene-container">
+
+        <div class="holo-base">
+            <div class="hologram-beam"></div>
+            <div class="holo-content">
+                <div class="holo-number" id="holo-val">---</div>
+            </div>
+        </div>
+
+        <div class="question-panel">
+            <div class="sequence-display" id="seq-display">3, 5, 7...</div>
+            <div id="q-text" style="color:#cfd8dc; font-size:1.2rem; margin-bottom:15px; font-weight:300;">
+                50. Yılda kaynak ihtiyacı ne olur?
+            </div>
+
+            <div class="input-area" id="input-area">
+                <input type="number" class="answer-input" id="user-ans" placeholder="?">
+                <button class="btn-predict" onclick="checkAnswer()">HESAPLA</button>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="fill" id="p-bar"></div>
+        </div>
+
+    </div>
+
+    <!-- Solution Modal -->
+    <div class="modal" id="solutionModal">
+        <div class="modal-content">
+            <h2 style="color:#80cbc4; margin:0; font-family:'Orbitron';">🔮 GELECEK TAHMİNİ</h2>
+            <div class="solution-box" id="solution-text"></div>
+            <button class="next-btn" onclick="nextLevel()">SONRAKİ YIL ❯</button>
+        </div>
+    </div>
+
+    <!-- Code Modal -->
+    <div class="modal" id="codeModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('codeModal')">&times;</span>
+            <h2 style="color:#2196f3; margin-top:0; font-family:'Orbitron';">💻 KOD LABORATUVARI</h2>
+            <p style="color:#b0bec5;">Gelecekteki bir adımı hesaplarken formül kullanırız.</p>
+            <div class="code-block" id="code-content">
+                <span class="com">// Genel Kural: <span id="code-rule">3 katının 1 eksiği</span></span><br>
+                <span class="kw">let</span> n = <span class="str" id="code-n">50</span>; <span class="com">// İstenen
+                    adım</span><br><br>
+                <span class="com">// Formülü uygula: 3n - 1</span><br>
+                <span class="kw">let</span> sonuc = (n * <span class="str" id="code-mul">3</span>) + <span class="str"
+                    id="code-add">-1</span>;<br>
+                <span class="fn">tahminEt</span>(sonuc);
+            </div>
+            <a href="https://app.talent14.com/codeEditor" target="_blank" class="next-btn"
+                style="text-decoration:none; display:inline-block; margin-top:10px; background:#2196f3; color:white; box-shadow:0 0 10px #2196f3;">EDİTÖRÜ
+                AÇ</a>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <h2 style="color:#80cbc4; font-family:'Orbitron';">SİMÜLASYON BAŞARILI!</h2>
+            <p style="color:#b0bec5; font-size:1.1rem;">Gelecek planlaması tamamlandı.</p>
+            <div style="font-size:4rem; margin:20px;">🌐</div>
+            <button class="next-btn" onclick="window.location.href='index2.html'">VADİYE DÖN</button>
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            { start: 3, inc: 3, target: 20, text: "3n kuralı (3 katı)" },
+            { start: 3, inc: 2, target: 50, text: "2n+1 kuralı (2 katının 1 fazlası)" },
+            { start: 6, inc: 5, target: 10, text: "5n+1 kuralı (5 katının 1 fazlası)" },
+            { start: 2, inc: 4, target: 25, text: "4n-2 kuralı (4 katının 2 eksiği)" },
+            { start: 4, inc: 3, target: 100, text: "3n+1 kuralı (3 katının 1 fazlası)" }
+        ];
+
+        let currentLvl = 0;
+        let isLocked = false;
+
+        function startGame() {
+            currentLvl = 0;
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLvl >= levels.length) {
+                document.getElementById('winModal').style.display = 'flex';
+                return;
+            }
+
+            const L = levels[currentLvl];
+            let seq = [];
+
+            // Generate visible part
+            for (let i = 1; i <= 3; i++) {
+                let val = L.inc * i + (L.start - L.inc);
+                seq.push(val);
+            }
+
+            document.getElementById('seq-display').innerText = seq.join(', ') + ", ...";
+            document.getElementById('q-text').innerText = `${L.target}. Adımda değer kaç olur?`;
+            document.getElementById('holo-val').innerText = "---";
+            document.getElementById('user-ans').value = "";
+
+            // Update Code Modal Logic
+            document.getElementById('code-rule').innerText = L.text;
+            document.getElementById('code-n').innerText = L.target;
+            document.getElementById('code-mul').innerText = L.inc;
+            let diff = L.start - L.inc;
+            document.getElementById('code-add').innerText = diff;
+
+            document.getElementById('p-bar').style.width = ((currentLvl / levels.length) * 100) + "%";
+            isLocked = false;
+        }
+
+        function checkAnswer() {
+            if (isLocked) return;
+
+            const L = levels[currentLvl];
+            const correctAns = L.inc * L.target + (L.start - L.inc);
+            const userAns = parseInt(document.getElementById('user-ans').value);
+
+            if (userAns === correctAns) {
+                isLocked = true;
+                document.getElementById('holo-val').innerText = correctAns;
+
+                let diff = L.start - L.inc;
+                let sign = diff >= 0 ? '+' : '';
+                let ruleStr = `${L.inc}n ${sign}${diff}`;
+                if (diff === 0) ruleStr = `${L.inc}n`;
+
+                let solHtml = `<strong>Genel Kural:</strong> ${ruleStr} (${L.text})<br>`;
+                solHtml += `Bu kuralda <strong>n</strong> yerine <strong>${L.target}</strong> koyalım.<br><br>`;
+                solHtml += `<strong>Hesaplama:</strong><br>`;
+                solHtml += `${L.inc} x ${L.target} = ${L.inc * L.target}<br>`;
+                if (diff !== 0) solHtml += `${L.inc * L.target} ${diff >= 0 ? '+' : '-'} ${Math.abs(diff)} = <strong>${correctAns}</strong>`;
+                else solHtml += `Sonuç: <strong>${correctAns}</strong>`;
+
+                document.getElementById('solution-text').innerHTML = solHtml;
+                setTimeout(() => { document.getElementById('solutionModal').style.display = 'flex'; }, 1000);
+            } else {
+                // Shake effect
+                document.getElementById('input-area').style.animation = "shake 0.5s";
+                setTimeout(() => document.getElementById('input-area').style.animation = "", 500);
+            }
+        }
+
+        // Add shake css
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes shake {
+                0% { transform: translateX(0); }
+                25% { transform: translateX(-5px); }
+                50% { transform: translateX(5px); }
+                75% { transform: translateX(-5px); }
+                100% { transform: translateX(0); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        document.getElementById('user-ans').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkAnswer();
+        });
+
+        function nextLevel() {
+            closeModal('solutionModal');
+            currentLvl++;
+            loadLevel();
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        window.onload = startGame;
+    </script>
+</body>
+
+</html>

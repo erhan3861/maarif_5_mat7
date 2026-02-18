@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enerji Deposu - Sayı Örüntüleri</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #e0f7fa;
+            color: #263238;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-image: linear-gradient(135deg, #e0f7fa 0%, #a7ffeb 100%);
+        }
+
+        /* Arkaplan Efekti */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                radial-gradient(#00b894 1px, transparent 1px),
+                radial-gradient(#00cec9 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            opacity: 0.15;
+        }
+
+        /* Top HUD */
+        .hud-top {
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #00b894;
+            color: #00695c;
+            padding: 10px 25px;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hud-btn:hover {
+            background: #00b894;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 184, 148, 0.2);
+        }
+
+        .btn-code {
+            border-color: #0984e3;
+            color: #0984e3;
+        }
+
+        .btn-code:hover {
+            background: #0984e3;
+            color: white;
+        }
+
+        /* Scene */
+        .scene-container {
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 5;
+        }
+
+        .battery-container {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            gap: 15px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .battery {
+            width: 70px;
+            background: #eceff1;
+            border: 4px solid #455a64;
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Battery Cap */
+        .battery::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 25%;
+            width: 50%;
+            height: 8px;
+            background: #455a64;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .charge {
+            width: 100%;
+            background: linear-gradient(to top, #00b894, #69f0ae);
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        /* Bubble animation for charge */
+        .charge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+            background-size: 10px 10px;
+            opacity: 0.3;
+        }
+
+        .charge-val {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            bottom: 5px;
+            font-weight: bold;
+            color: #263238;
+            z-index: 2;
+            font-size: 1.1rem;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .day-label {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: #455a64;
+            font-weight: bold;
+            font-family: 'Orbitron';
+        }
+
+        /* Question Panel */
+        .question-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 50px;
+            border-radius: 25px;
+            text-align: center;
+            min-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 1);
+            transform: translateY(0);
+            transition: transform 0.3s;
+        }
+
+        .question-panel:hover {
+            transform: translateY(-5px);
+        }
+
+        .q-text {
+            font-size: 1.3rem;
+            color: #37474f;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .pattern-display {
+            font-size: 2.2rem;
+            color: #00b894;
+            font-family: 'Orbitron';
+            margin-bottom: 25px;
+            text-shadow: 0 2px 4px rgba(0, 184, 148, 0.2);
+            letter-spacing: 2px;
+        }
+
+        .options-grid {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .opt-btn {
+            background: #ffffff;
+            border: 2px solid #b2bec3;
+            color: #2d3436;
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            font-family: 'Orbitron';
+            box-shadow: 0 4px 0 #b2bec3;
+        }
+
+        .opt-btn:hover {
+            border-color: #00b894;
+            color: #00b894;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #b2bec3;
+        }
+
+        .opt-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 0 #b2bec3;
+        }
+
+        .opt-btn.correct {
+            background: #00b894;
+            border-color: #00b894;
+            color: white;
+            box-shadow: 0 4px 0 #00897b;
+        }
+
+        .opt-btn.wrong {
+            background: #ff7675;
+            border-color: #ff7675;
+            color: white;
+            box-shadow: 0 4px 0 #d63031;
+        }
+
+        /* Progress */
+        .progress-bar {
+            width: 60%;
+            height: 12px;
+            background: rgba(38, 50, 56, 0.1);
+            border-radius: 10px;
+            margin-top: 40px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00b894, #0984e3);
+            transition: width 0.5s;
+        }
+
+        /* Modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 30px;
+            text-align: center;
+            border-radius: 20px;
+            max-width: 600px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: #b2bec3;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #2d3436;
+        }
+
+        .solution-box {
+            background: #e0f2f1;
+            border-left: 6px solid #00b894;
+            padding: 20px;
+            text-align: left;
+            margin: 20px 0;
+            color: #00695c;
+            border-radius: 0 10px 10px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .next-btn {
+            background: linear-gradient(45deg, #00b894, #0984e3);
+            color: white;
+            padding: 12px 35px;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
+            transition: 0.3s;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 184, 148, 0.6);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: #2d3436;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-family: 'Consolas', monospace;
+            font-size: 1rem;
+            margin: 20px 0;
+            border-left: 5px solid #0984e3;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .kw {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .fn {
+            color: #8be9fd;
+        }
+
+        .str {
+            color: #f1fa8c;
+        }
+
+        .com {
+            color: #6272a4;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-pattern"></div>
+
+    <div class="hud-top">
+        <a href="index2.html" class="hud-btn">❮ VADİYE DÖN</a>
+        <div
+            style="font-size:1.4rem; color:#00695c; font-family:'Orbitron'; font-weight:bold; text-shadow: 1px 1px 0 rgba(255,255,255,1);">
+            ENERJİ DEPOSU</div>
+        <button onclick="openModal('codeModal')" class="hud-btn btn-code">💻 KODLA</button>
+    </div>
+
+    <div class="scene-container">
+
+        <div class="battery-container" id="visual-area">
+            <!-- Batteries generated here -->
+        </div>
+
+        <div class="question-panel">
+            <div class="pattern-display" id="pattern-text">5, 10, 15...</div>
+            <div class="q-text" id="q-text">1. Günde 5 kWh, 2. Günde 10 kWh doluyor.<br>4. Günde toplam kaç kWh enerji
+                olur?</div>
+            <div class="options-grid" id="opt-grid"></div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="fill" id="p-bar"></div>
+        </div>
+
+    </div>
+
+    <!-- Solution Modal -->
+    <div class="modal" id="solutionModal">
+        <div class="modal-content">
+            <h2 style="color:#00b894; margin-top:0; font-family:'Orbitron';">⚡ ÇÖZÜM YOLU</h2>
+            <div class="solution-box" id="solution-text"></div>
+            <button class="next-btn" onclick="nextLevel()">SONRAKİ SEVİYE ❯</button>
+        </div>
+    </div>
+
+    <!-- Code Modal -->
+    <div class="modal" id="codeModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('codeModal')">&times;</span>
+            <h2 style="color:#0984e3; margin-top:0; font-family:'Orbitron';">💻 KOD LABORATUVARI</h2>
+            <p style="color:#636e72;">Bu örüntüyü bir bilgisayar programı ile hesaplasaydık:</p>
+            <div class="code-block" id="code-content">
+                <span class="com">// Her gün eklenen sabit miktar</span><br>
+                <span class="kw">let</span> artisMiktari = <span class="str" id="code-inc">5</span>;<br>
+                <span class="kw">let</span> gun = <span class="str" id="code-target">4</span>;<br><br>
+                <span class="com">// Çarpma işlemi ile sonucu bul</span><br>
+                <span class="kw">let</span> toplam = artisMiktari * gun;<br>
+                <span class="fn">console.log</span>(toplam);
+            </div>
+            <a href="https://app.talent14.com/codeEditor" target="_blank" class="next-btn"
+                style="text-decoration:none; display:inline-block; margin-top:10px;">EDİTÖRÜ AÇ</a>
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <h2 style="color:#00b894; font-family:'Orbitron';">ENERJİ FULLENDİ!</h2>
+            <p style="color:#555; font-size:1.1rem;">Tüm depolama üniteleri maksimum kapasiteye ulaştı.</p>
+            <div style="font-size:4rem; margin:20px;">🔋</div>
+            <button class="next-btn" onclick="window.location.href='index2.html'">VADİYE DÖN</button>
+        </div>
+    </div>
+
+    <script>
+        const levels = [
+            { start: 5, inc: 5, target: 4, label: "kWh", rule: "Her gün +5 ekleniyor." },
+            { start: 10, inc: 10, target: 5, label: "kWh", rule: "Her gün +10 ekleniyor." },
+            { start: 2, inc: 2, target: 6, label: "V", rule: "Voltaj her adımda +2 artıyor." },
+            { start: 3, inc: 3, target: 5, label: "A", rule: "Akım her saat +3 artıyor." },
+            { start: 20, inc: 20, target: 4, label: "W", rule: "Güç her panelde +20 artıyor." }
+        ];
+
+        let currentLvl = 0;
+        let isLocked = false;
+
+        function startGame() {
+            currentLvl = 0;
+            loadLevel();
+        }
+
+        function loadLevel() {
+            if (currentLvl >= levels.length) {
+                document.getElementById('winModal').style.display = 'flex';
+                return;
+            }
+
+            const L = levels[currentLvl];
+            const correctAns = L.start * L.target;
+
+            // Visuals
+            const container = document.getElementById('visual-area');
+            container.innerHTML = "";
+
+            // Show first 3 steps + target placeholder (if possible, but usually just visual context)
+            let showCount = 3;
+            for (let i = 1; i <= showCount; i++) {
+                let val = L.start * i;
+                let hRatio = (val / (L.start * L.target)) * 100;
+                if (hRatio > 100) hRatio = 100;
+                if (hRatio < 15) hRatio = 15; // Min height for visibility
+
+                let div = document.createElement('div');
+                div.style.display = 'flex';
+                div.style.flexDirection = 'column';
+                div.style.alignItems = 'center';
+                div.innerHTML = `
+                    <div class="battery" style="height:120px;">
+                        <div class="charge" style="height:${hRatio}%">
+                             <div class="charge-val">${val}</div>
+                        </div>
+                    </div>
+                    <div class="day-label">${i}. Gün</div>
+                `;
+                container.appendChild(div);
+            }
+
+            // Generate sequence text
+            let seq = [];
+            for (let i = 1; i <= 3; i++) seq.push(L.start * i);
+            document.getElementById('pattern-text').innerText = seq.join(', ') + ", ...";
+            document.getElementById('q-text').innerText = `${L.rule} ${L.target}. Günde ne kadar olur?`;
+
+            // Update Code Modal Logic
+            document.getElementById('code-inc').innerText = L.inc;
+            document.getElementById('code-target').innerText = L.target;
+
+            // Options
+            let opts = [correctAns];
+            while (opts.length < 3) {
+                let offset = (Math.floor(Math.random() * 3) + 1) * L.inc;
+                if (Math.random() > 0.5) offset = -offset;
+                let wrong = correctAns + offset;
+                if (wrong > 0 && !opts.includes(wrong)) opts.push(wrong);
+            }
+            opts.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('opt-grid');
+            grid.innerHTML = "";
+            opts.forEach(val => {
+                let btn = document.createElement('button');
+                btn.className = 'opt-btn';
+                btn.innerText = val + " " + L.label;
+                btn.onclick = () => handleAnswer(btn, val, correctAns, L);
+                grid.appendChild(btn);
+            });
+
+            document.getElementById('p-bar').style.width = ((currentLvl / levels.length) * 100) + "%";
+            isLocked = false;
+        }
+
+        function handleAnswer(btn, val, correct, levelData) {
+            if (isLocked) return;
+            isLocked = true;
+
+            if (val === correct) {
+                btn.classList.add('correct');
+
+                // Detailed Solution Construction
+                let solHtml = `<strong>🧐 Analiz:</strong> ${levelData.rule}<br>`;
+                solHtml += `Örüntü her adımda <strong>${levelData.inc}</strong> artıyor.<br><hr style="border:0; border-top:1px solid #b2dfdb; margin:10px 0;">`;
+                solHtml += `<strong>Hesaplama Adımları:</strong><br>`;
+
+                // Show condensed steps if target is large, but here targets are small (4, 5, 6)
+                for (let i = 1; i <= levelData.target; i++) {
+                    let currentVal = levelData.start * i;
+                    let isTarget = (i === levelData.target);
+                    let style = isTarget ? "color:#00796b; font-weight:bold; background:#b2dfdb; padding:2px 5px; border-radius:4px;" : "";
+                    solHtml += `<div style="margin-bottom:4px; ${style}">Adım ${i}: ${levelData.inc} x ${i} = ${currentVal} ${levelData.label} ` + (isTarget ? "✅" : "") + `</div>`;
+                }
+
+                document.getElementById('solution-text').innerHTML = solHtml;
+
+                setTimeout(() => {
+                    openModal('solutionModal');
+                }, 800);
+            } else {
+                btn.classList.add('wrong');
+                setTimeout(() => {
+                    btn.classList.remove('wrong');
+                    isLocked = false;
+                }, 1000);
+            }
+        }
+
+        function nextLevel() {
+            closeModal('solutionModal');
+            currentLvl++;
+            loadLevel();
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        window.onload = startGame;
+    </script>
+</body>
+
+</html>

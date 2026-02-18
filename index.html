@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doğa ve Bilim Vadisi - Cebirsel Düşünme</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #e0f7fa;
+            color: #2c3e50;
+            font-family: 'Roboto', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-image: linear-gradient(135deg, #e0f7fa 0%, #a7ffeb 100%);
+        }
+
+        /* Arkaplan Efekti (Yapraklar/Veri) */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                radial-gradient(#00b894 1px, transparent 1px),
+                radial-gradient(#00cec9 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            opacity: 0.1;
+        }
+
+        /* Başlık Alanı */
+        .header-section {
+            text-align: center;
+            margin: 40px 0 30px 0;
+            z-index: 20;
+            position: relative;
+            width: 90%;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            margin: 0;
+            color: #00695c;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.5);
+        }
+
+        .sub-title {
+            font-size: 1.2rem;
+            color: #455a64;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        .mission-tag {
+            background: linear-gradient(45deg, #00b894, #0984e3);
+            color: #fff;
+            padding: 6px 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Köşe Butonları */
+        .corner-btn {
+            position: absolute;
+            top: 25px;
+            z-index: 30;
+            background: #fff;
+            border: 2px solid #00b894;
+            color: #00695c;
+            padding: 10px 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+        }
+
+        .corner-btn:hover {
+            background: #00b894;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 184, 148, 0.2);
+        }
+
+        .btn-rules {
+            left: 30px;
+        }
+
+        .btn-code {
+            right: 30px;
+            border-color: #0984e3;
+            color: #0984e3;
+        }
+
+        .btn-code:hover {
+            background: #0984e3;
+            color: #fff;
+        }
+
+        /* Oyun Grid Yapısı */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            width: 85%;
+            max-width: 1200px;
+            padding-bottom: 50px;
+            z-index: 20;
+        }
+
+        .game-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 200px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #00b894, #0984e3);
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+        }
+
+        .game-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            color: #2d3436;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .game-desc {
+            font-size: 0.9rem;
+            color: #636e72;
+            line-height: 1.5;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .play-btn {
+            background: #f1f2f6;
+            border: none;
+            color: #2d3436;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+            font-size: 0.9rem;
+            border-radius: 50px;
+            font-weight: bold;
+        }
+
+        .game-card:hover .play-btn {
+            background: linear-gradient(45deg, #00b894, #0984e3);
+            color: #fff;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            color: #b2bec3;
+            font-size: 2.5rem;
+            cursor: pointer;
+            line-height: 20px;
+            transition: 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #2d3436;
+        }
+
+        .modal-header {
+            font-family: 'Orbitron', sans-serif;
+            color: #00695c;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #b2bec366;
+            padding-bottom: 10px;
+        }
+
+        .rule-list {
+            text-align: left;
+            margin: 20px 0;
+            list-style: none;
+            padding: 0;
+        }
+
+        .rule-list li {
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+            color: #2d3436;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .rule-list li::before {
+            content: '✔️';
+            position: absolute;
+            left: 0;
+            color: #00b894;
+            font-size: 0.9rem;
+            top: 2px;
+        }
+
+        /* Kod Modalı */
+        .code-block {
+            background: #2d3436;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            font-family: 'Consolas', monospace;
+            font-size: 1rem;
+            margin: 25px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-left: 5px solid #0984e3;
+        }
+
+        .kw {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .fn {
+            color: #8be9fd;
+        }
+
+        .str {
+            color: #f1fa8c;
+        }
+
+        .com {
+            color: #6272a4;
+            font-style: italic;
+        }
+
+        @media (max-width: 900px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-section {
+                margin-top: 80px;
+            }
+
+            .corner-btn {
+                position: relative;
+                top: 0;
+                margin: 5px;
+                display: inline-block;
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-pattern"></div>
+
+    <!-- Köşe Butonları -->
+    <button class="corner-btn btn-code" onclick="openModal('codeModal')">💻 KOD LABORATUVARI</button>
+    <button class="corner-btn btn-rules" onclick="openModal('missionModal')">📋 GÖREV PANELİ</button>
+
+    <div class="header-section">
+        <h1>DOĞA VE BİLİM VADİSİ</h1>
+        <div class="sub-title">MAT.5.2.3 CEBİRSEL DÜŞÜNME VE ÖRÜNTÜLER</div>
+    </div>
+
+    <div class="games-grid">
+        <!-- Oyun 21 -->
+        <div class="game-card" onclick="location.href='oyun21.html'">
+            <div class="game-icon">🔋</div>
+            <div class="game-title">ENERJİ DEPOSU</div>
+            <div class="game-desc">Sayı Örüntüleri</div>
+            <button class="play-btn">BAŞLAT</button>
+        </div>
+
+        <!-- Oyun 22 -->
+        <div class="game-card" onclick="location.href='oyun22.html'">
+            <div class="game-icon">🌱</div>
+            <div class="game-title">AKILLI SERA</div>
+            <div class="game-desc">Şekil Örüntüleri</div>
+            <button class="play-btn">BAŞLAT</button>
+        </div>
+
+        <!-- Oyun 23 -->
+        <div class="game-card" onclick="location.href='oyun23.html'">
+            <div class="game-icon">♻️</div>
+            <div class="game-title">DÖNÜŞÜM İSTASYONU</div>
+            <div class="game-desc">İki İşlem</div>
+            <button class="play-btn">BAŞLAT</button>
+        </div>
+
+        <!-- Oyun 24 -->
+        <div class="game-card" onclick="location.href='oyun24.html'">
+            <div class="game-icon">📊</div>
+            <div class="game-title">VERİ ANALİZİ</div>
+            <div class="game-desc">Tablo Okuma</div>
+            <button class="play-btn">BAŞLAT</button>
+        </div>
+
+        <!-- Oyun 25 -->
+        <div class="game-card" onclick="location.href='oyun25.html'">
+            <div class="game-icon">🌐</div>
+            <div class="game-title">SİMÜLASYON ODASI</div>
+            <div class="game-desc">Uzak Adımlar</div>
+            <button class="play-btn">BAŞLAT</button>
+        </div>
+
+        <!-- Oyun 26 (Değerlendirme) -->
+        <div class="game-card" onclick="location.href='oyun26.html'">
+            <div class="game-icon">🛡️</div>
+            <div class="game-title">DOĞA KORUYUCUSU</div>
+            <div class="game-desc">Tüm analiz yeteneklerini kullan ve sertifikanı al!</div>
+            <button class="play-btn">BAŞLAT</button>
+        </div>
+    </div>
+
+    <!-- Görev Modalı -->
+    <div class="modal" id="missionModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('missionModal')">&times;</span>
+            <h2 class="modal-header">GÖREV VE KAZANIMLAR</h2>
+            <p style="color:#636e72; font-style:italic; margin-bottom:20px;">
+                "Öğrenciler sayı ve şekil örüntülerinin kuralına ilişkin muhakeme yapabilme becerisi kazanır."
+            </p>
+            <ul class="rule-list">
+                <li><strong>Sayı Örüntüleri:</strong> Artış miktarını bularak sonraki adımları tahmin etme.</li>
+                <li><strong>Şekil Örüntüleri:</strong> Şekillerin büyüme kuralını sayısal ilişkiye dökme.</li>
+                <li><strong>Kuralı Bulma:</strong> Adım sayısı ile sonuç arasındaki ilişkiyi (Örn: 3 katı) keşfetme.
+                </li>
+                <li><strong>Genelleme:</strong> Uzak adımlardaki (örn. 50. adım) durumu hesaplama.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Kod Modalı -->
+    <div class="modal" id="codeModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('codeModal')">&times;</span>
+            <h2 class="modal-header" style="color:#0984e3;">KOD LABORATUVARI</h2>
+            <p style="color:#636e72;">Örüntüler, bilgisayar biliminin temelidir. Döngüler sayesinde tekrarlayan işleri
+                otomatikleştiririz.</p>
+            <div class="code-block">
+                <span class="kw">for</span> (Let gun = 1; gun <= 30; gun++) {<br>
+                    &nbsp;&nbsp;<span class="kw">let</span> enerji = gun * 5;<br>
+                    &nbsp;&nbsp;<span class="fn">kayitEkle</span>(<span class="str">"Enerji Üretimi"</span>,
+                    enerji);<br>
+                    }
+            </div>
+            <a href="https://app.talent14.com/codeEditor" target="_blank" class="corner-btn btn-code"
+                style="position:relative; top:0; left:0; display:inline-block; margin-top:20px;">EDİTÖRÜ AÇ</a>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    </script>
+</body>
+
+</html>
